@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-q=odom5uc#8*nj1ot%ef^#!ti7m1my(uiz7mux#(ubvskq%3g6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['app_instagram.render.com']
+ALLOWED_HOSTS = ['InstagramProject.render.com']
 
 
 # Application definition
