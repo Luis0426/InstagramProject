@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="{% static 'app_instagram/img/logoinsta.ico' %}" type="image/ico">
+    <!-- Latest compiled JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram2 - Config</title>
+</head>
+<body class="d-flex justify-content-center align-items-center margin mt-5">
+    <div class="w-50 h-50 position-center border border-5 p-3 rounded">
+    
+        <center><img src="{% static 'app_instagram\img\logousuario.png' %}" alt="" class="img-fluid w-25 h-25"></center>
+        
+        <center><h1 class="h3">Configuracion</h1></center>
+            <div class="mb-3">
+                <a href="{% url 'configDatos' %}"><label class="form-label">Configuracion Datos Cuenta</label></a>
+                
+            </div>
+            <hr>
+            <div class="mb-3">
+              <label class="form-label" id="logoutButton" style="cursor: pointer;">Cerrar Sesión</label>
+          </div>
+
+            <hr>
+            <div class="mb-3">
+                <a href=""><label class="form-label">Borrar Cuenta</label></a>
+                
+            </div>
+            <hr>
+            <div class="mb-3">
+                <a href="{% url 'home' %}"><label class="form-label">Volver</label></a>
+                
+            </div>
+        </div>
+</body>
+<!-- CERRAR SESION FUNCION-->
+<script>
+    document.getElementById('logoutButton').addEventListener('click', async function () {
+    try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const response = await fetch('/logout/', {
+            method: 'POST', // Usa POST para cerrar sesión
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken, // Token CSRF para evitar errores
+            },
+        });
+
+        const result = await response.json();
+        if (result.status === 'success') {
+            alert(result.message);
+            window.location.href = result.redirect_url; // Redirige al login
+        } else {
+            alert('Error al cerrar sesión. Inténtalo nuevamente.');
+        }
+    } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+    }
+  });
+  </script>
+</html>
