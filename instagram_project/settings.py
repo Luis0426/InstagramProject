@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-q=odom5uc#8*nj1ot%ef^#!ti7m1my(uiz7mux#(ubvskq%3g6"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'instagramproject-0rfq.onrender.com',  # Agrega aquí el dominio de tu aplicación en Render
