@@ -69,7 +69,7 @@ WSGI_APPLICATION = "instagram_project.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'Cluster0',  # Reemplaza con el nombre de tu base de datos en Atlas
+        'NAME': 'Cluster1',  # Reemplaza con el nombre de tu base de datos en Atlas
         'ENABLED': True,
         'CLIENT': {
             'host': 'mongodb+srv://LuisAJV:wmem3MafH92yjLxC@cluster0.rty11.mongodb.net/nombre_de_tu_base_de_datos?retryWrites=true&w=majority',
