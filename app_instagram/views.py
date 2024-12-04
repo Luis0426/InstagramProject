@@ -12,7 +12,8 @@ from django.contrib.auth.hashers import check_password,make_password
 from .models import UsuarioInsta
 from django.contrib.auth import login, authenticate
 import json
-
+from django.contrib import messages
+from .models import UsuarioInsta
 
 
 class RegisterView(View):
@@ -30,6 +31,7 @@ class ConfigDatosView(View):
 class HomeView(View):
     def get(self, request):
         return render(request, 'home.html')
+
 
 @csrf_exempt
 def logout_user(request):
@@ -112,3 +114,22 @@ def get_user_data(request):
     
     except UsuarioInsta.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Usuario no encontrado'}, status=404)
+
+
+@csrf_exempt
+@login_required
+def delete_account(request):
+    if request.method == 'POST':
+        try:
+            user = request.user  # Usuario autenticado
+            usuario_insta = UsuarioInsta.objects.get(correo=user.correo)  # Buscar en la base de datos
+            usuario_insta.delete()  # Eliminar usuario de la base de datos
+            logout(request)  # Cerrar sesión
+            return JsonResponse({
+                'status': 'success', 
+                'message': 'Tu cuenta ha sido eliminada.', 
+                'redirect_url': '/login/'  # Redirige al login después de eliminar
+            })
+        except UsuarioInsta.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Usuario no encontrado.'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)

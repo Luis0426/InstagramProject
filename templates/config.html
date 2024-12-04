@@ -28,8 +28,7 @@
 
             <hr>
             <div class="mb-3">
-                <a href=""><label class="form-label">Borrar Cuenta</label></a>
-                
+                <a href="#" id="deleteAccountLink" class="form-label text-danger" style="cursor: pointer;">Borrar Cuenta</a>
             </div>
             <hr>
             <div class="mb-3">
@@ -63,5 +62,33 @@
         console.error('Error al cerrar sesión:', error);
     }
   });
+
+   // Función para borrar cuenta
+   document.getElementById('deleteAccountLink').addEventListener('click', async function (e) {
+    e.preventDefault();
+
+    if (confirm('¿Estás seguro de que deseas borrar tu cuenta? Esta acción es irreversible.')) {
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const response = await fetch("{% url 'delete_account' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken
+                }
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert(result.message);
+                window.location.href = result.redirect_url;
+            } else {
+                alert('Error al borrar la cuenta. Inténtalo nuevamente.');
+            }
+        } catch (error) {
+            console.error('Error al borrar la cuenta:', error);
+        }
+    }
+});
+
   </script>
 </html>

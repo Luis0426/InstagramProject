@@ -1,6 +1,6 @@
 from django.views import View
 from django.urls import path, include
-from .views import RegisterView,login_user,register_user,HomeView,ConfigView,logout_user,ConfigDatosView,get_user_data
+from .views import RegisterView,login_user,register_user,HomeView,ConfigView,logout_user,ConfigDatosView,get_user_data, delete_account
 
 
 urlpatterns = [
@@ -13,4 +13,5 @@ urlpatterns = [
     path('configDatos/', ConfigDatosView.as_view(), name='configDatos'),
     path('logout/', logout_user, name='logout'),
     path('get_user_data/', get_user_data, name='get_user_data'),
+    path('delete_account/', delete_account, name='delete_account'),
 ]
