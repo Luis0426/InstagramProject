@@ -15,6 +15,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'instagramproject-0rfq.onrender.com',  # Agrega aquí el dominio de tu aplicación en Render
+    '127.0.0.1' 
 ]
 
 
