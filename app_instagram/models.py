@@ -1,4 +1,4 @@
-
+from django.core.validators import FileExtensionValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 
@@ -38,3 +38,43 @@ class UsuarioInsta(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
+
+class Publicacion(models.Model):
+    usuario = models.ForeignKey(UsuarioInsta, on_delete=models.CASCADE, related_name='publicaciones')
+    imagen = models.ImageField(upload_to='publicaciones/', validators=[FileExtensionValidator(['jpg', 'png', 'jpeg'])])
+    descripcion = models.TextField(blank=True, null=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Publicación de {self.usuario.usuario} en {self.fecha_creacion}'
+    
+
+class Relacion(models.Model):
+    seguidor = models.ForeignKey(UsuarioInsta, on_delete=models.CASCADE, related_name='siguiendo')
+    seguido = models.ForeignKey(UsuarioInsta, on_delete=models.CASCADE, related_name='seguidores')
+    fecha_seguimiento = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.seguidor.usuario} sigue a {self.seguido.usuario}'
+
+
+
+class Like(models.Model):
+    usuario = models.ForeignKey(UsuarioInsta, on_delete=models.CASCADE)
+    publicacion = models.ForeignKey(Publicacion, on_delete=models.CASCADE, related_name='likes')
+    fecha_like = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.usuario.usuario} le dio like a {self.publicacion.id}'
+
+
+
+class Comentario(models.Model):
+    usuario = models.ForeignKey(UsuarioInsta, on_delete=models.CASCADE)
+    publicacion = models.ForeignKey(Publicacion, on_delete=models.CASCADE, related_name='comentarios')
+    texto = models.TextField()
+    fecha_comentario = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Comentario de {self.usuario.usuario} en {self.publicacion.id}'

@@ -129,3 +129,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Ruta para los archivos cargados por el usuario
+MEDIA_URL = '/media/'  # URL base para acceder a los archivos
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Carpeta donde se almacenan los archivos
