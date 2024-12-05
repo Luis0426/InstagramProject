@@ -159,7 +159,7 @@ def delete_account(request):
             return JsonResponse({
                 'status': 'success', 
                 'message': 'Tu cuenta ha sido eliminada.', 
-                'redirect_url': '/login/'  # Redirige al login después de eliminar
+                'redirect_url': '/'  # Redirige al login después de eliminar
             })
         except UsuarioInsta.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Usuario no encontrado.'}, status=404)
