@@ -19,12 +19,15 @@
         <center><h1 class="h3">Configuracion - Datos</h1></center>
         <div class="mb-3">
           <label for="nombre_usuario" class="form-label">Nombre de Usuario:</label>
-          <label for="nombre_usuarioC" class="form-label" id="nombre_usuarioC">{{ nombre_usuario }}</label>
+          <label for="nombre_usuarioC" class="form-label" id="nombre_usuarioC">{{ nombre_usuario }}</label><br>
+           <button type="button" class="btn btn-primary btn-sm" id="modifyUsernameButton">Cambiar Nombre Usuario</button>
+          
       </div>
       
       <div class="mb-3">
           <label for="nombre_personal" class="form-label">Nombre Personal:</label>
-          <label for="nombre_personalC" class="form-label" id="nombre_personalC">{{ nombre_personal }}</label>
+          <label for="nombre_personalC" class="form-label" id="nombre_personalC">{{ nombre_personal }}</label><br>
+          <button type="button" class="btn btn-primary btn-sm" id="modifyPersonalNameButton">Cambiar Nombre Personal</button>
       </div>
       
       <div class="mb-3 mt-3">
@@ -34,12 +37,84 @@
       
       <div class="mb-3">
           <label for="pwd" class="form-label">Contraseña:</label>
-          <label for="contraseñaC" class="form-label" id="contraseñaC">********</label>
+          <label for="contraseñaC" class="form-label" id="contraseñaC">*********</label><br>
+          <button type="button" class="btn btn-primary btn-sm" id="modifyPasswordButton">Cambiar Contraseña</button>
+        
       </div>
       
             
             <center><a href="{% url 'config' %}"><p>Volver</p></a></center>
         </div>
+        <!-- VENTANA PARA MODIFICAR EL NOMBRE DE USUARIO -->
+        <div class="modal fade" id="modifyUsernameModal" tabindex="-1" aria-labelledby="modifyUsernameModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="modifyUsernameModalLabel">Modificar Nombre de Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <form id="modifyUsernameForm">
+                  <div class="mb-3">
+                    <label for="new_username" class="form-label">Nuevo Nombre de Usuario</label>
+                    <input type="text" class="form-control" id="new_username" name="new_username" required>
+                  </div>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary" form="modifyUsernameForm">Aceptar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- VENTANA PARA MODIFICAR EL NOMBRE Personal -->
+         <!-- Modal para modificar el nombre personal -->
+<div class="modal fade" id="modifyPersonalNameModal" tabindex="-1" aria-labelledby="modifyPersonalNameModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modifyPersonalNameModalLabel">Modificar Nombre Personal</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="newPersonalName" class="form-label">Nuevo Nombre Personal:</label>
+        <input type="text" id="newPersonalName" class="form-control" placeholder="Ingresa el nuevo nombre personal">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="savePersonalNameButton">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VENTANA PARA MODIFICAR LA CONTRASEÑA -->
+<div class="modal fade" id="modifyPasswordModal" tabindex="-1" aria-labelledby="modifyPasswordModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modifyPasswordModalLabel">Modificar Contraseña</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="currentPassword" class="form-label fw-bold">NOTA: Al modificar la constraseña se cerrara la sesion automaticamente</label>
+        <label for="currentPassword" class="form-label">Contraseña Actual:</label>
+        <input type="password" id="currentPassword" class="form-control" placeholder="Ingresa tu contraseña actual">
+        
+        <label for="newPassword" class="form-label mt-3">Nueva Contraseña:</label>
+        <input type="password" id="newPassword" class="form-control" placeholder="Ingresa tu nueva contraseña">
+        
+        <label for="confirmPassword" class="form-label mt-3">Confirmar Nueva Contraseña:</label>
+        <input type="password" id="confirmPassword" class="form-control" placeholder="Confirma tu nueva contraseña">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="savePasswordButton">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 
 <script>
@@ -63,5 +138,125 @@
         console.error('Error al obtener datos del usuario:', error);
       }
     });
+
+    document.getElementById('modifyUsernameButton').addEventListener('click', function () {
+    // Mostrar el modal
+    const modifyUsernameModal = new bootstrap.Modal(document.getElementById('modifyUsernameModal'));
+    modifyUsernameModal.show();
+});
+
+/* Funcion para modificar usuario */
+document.getElementById('modifyUsernameForm').addEventListener('submit', async function (event) {
+    event.preventDefault(); // Prevenir el envío estándar del formulario
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const newUsername = document.getElementById('new_username').value;
+
+    try {
+        const response = await fetch('/modify-username/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+            body: JSON.stringify({ new_username: newUsername }), // Enviar el nuevo nombre de usuario
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            alert(result.message);
+            location.reload(); // Recargar la página para reflejar los cambios
+        } else {
+            alert(result.message); // Mostrar mensaje de error si hay conflicto
+        }
+    } catch (error) {
+        console.error('Error al modificar el nombre de usuario:', error);
+        alert('Ocurrió un error. Por favor, inténtalo más tarde.');
+    }
+});
+
+//Funcion para modificar el nombre personal:
+// Mostrar el modal cuando se haga clic en "Modificar"
+document.getElementById('modifyPersonalNameButton').addEventListener('click', function () {
+    const modal = new bootstrap.Modal(document.getElementById('modifyPersonalNameModal'));
+    modal.show();
+  });
+
+  // Guardar el nuevo nombre personal
+  document.getElementById('savePersonalNameButton').addEventListener('click', async function () {
+    const newPersonalName = document.getElementById('newPersonalName').value.trim();
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    if (!newPersonalName) {
+      alert('El nombre personal no puede estar vacío.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/modify-personal-name/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken, // Token CSRF para seguridad
+        },
+        body: JSON.stringify({ new_personal_name: newPersonalName }),
+      });
+
+      const result = await response.json();
+      if (result.status === 'success') {
+        alert(result.message);
+        location.reload(); // Recargar la página para reflejar los cambios
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error('Error al modificar el nombre personal:', error);
+      alert('Ocurrió un error. Inténtalo nuevamente.');
+    }
+  });
+
+  //FUNCION PARA MODIFICAR LA CONTRASEÑA
+  // Mostrar el modal cuando se haga clic en "Modificar"
+  document.getElementById('modifyPasswordButton').addEventListener('click', function () {
+    const modal = new bootstrap.Modal(document.getElementById('modifyPasswordModal'));
+    modal.show();
+  });
+
+  // Guardar la nueva contraseña
+  document.getElementById('savePasswordButton').addEventListener('click', async function () {
+    const currentPassword = document.getElementById('currentPassword').value.trim();
+    const newPassword = document.getElementById('newPassword').value.trim();
+    const confirmPassword = document.getElementById('confirmPassword').value.trim();
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Validar que todos los campos estén llenos
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      alert('Todos los campos son obligatorios.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/modify-password/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken, // Token CSRF para seguridad
+        },
+        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword, confirm_password: confirmPassword }),
+      });
+
+      const result = await response.json();
+      if (result.status === 'success') {
+        alert(result.message);
+        window.location.href = result.redirect_url; // Redirigir al inicio de sesión
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error('Error al modificar la contraseña:', error);
+      alert('Ocurrió un error. Inténtalo nuevamente.');
+    }
+  });
   </script>
 </html>
