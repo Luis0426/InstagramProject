@@ -1,6 +1,6 @@
 from . import views
 from django.urls import path, include
-from .views import RegisterView,login_user,register_user,HomeView,ConfigView,logout_user,ConfigDatosView,get_user_data, delete_account, perfilView, search_user, buscarView
+from .views import RegisterView,actualizar_perfil,login_user,register_user,HomeView,ConfigView,logout_user,ConfigDatosView,get_user_data, delete_account, perfilView, search_user, buscarView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -21,7 +21,7 @@ urlpatterns = [
     path('modify-username/', views.modify_username, name='modify_username'),
     path('modify-personal-name/', views.modify_personal_name, name='modify_personal_name'),
     path('modify-password/', views.modify_password, name='modify_password'),
-
+    path('perfil/actualizar/', actualizar_perfil, name='actualizar'),
 ]
 
 # Servir archivos MEDIA en desarrollo

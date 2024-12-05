@@ -13,8 +13,8 @@ from .models import UsuarioInsta
 from django.contrib.auth import login, authenticate
 import json
 from django.contrib import messages
-from .models import UsuarioInsta
-
+from .models import UsuarioInsta, Relacion
+from django.views.decorators.csrf import csrf_protect
 
 class RegisterView(View):
     def get(self, request):
@@ -42,15 +42,14 @@ class buscarView(View):
         usuario = get_object_or_404(UsuarioInsta, usuario=username)
         return render(request, 'buscar.html', {'nombre_usuario': usuario.usuario, 'correo': usuario.correo})
 
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_protect
-from django.views import View
-from .models import UsuarioInsta
-
 @csrf_protect
 def search_user(request):
     if request.method == 'POST':
         username = request.POST.get('username')
+    elif request.method == 'GET':
+        username = request.GET.get('username')
+    
+    if username:
         try:
             usuario = UsuarioInsta.objects.get(usuario=username)
             return JsonResponse({
@@ -63,6 +62,8 @@ def search_user(request):
             })
         except UsuarioInsta.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Usuario no encontrado'}, status=404)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Nombre de usuario no proporcionado'}, status=400)
     
 @csrf_exempt
 def logout_user(request):
@@ -239,3 +240,12 @@ def modify_password(request):
         return JsonResponse({'status': 'success', 'message': 'Contraseña modificada con éxito.', 'redirect_url': '/'})
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido.'}, status=405)
+
+@csrf_exempt
+@login_required
+def actualizar_perfil(request):
+    if request.method == 'POST':
+        request.user.imagen_perfil = request.FILES.get('imagen_perfil')
+        request.user.save()
+        return redirect('perfil')
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
