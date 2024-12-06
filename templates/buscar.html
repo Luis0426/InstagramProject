@@ -52,6 +52,34 @@
     <button id="seguir-btn" class="btn btn-outline-primary btn-follow">Cargando...</button>
 </div>
 
+<div class="container mt-5">
+  <center><h3>Publicaciones</h3></center>
+  <div class="row">
+      {% for post in posts %}
+      <div class="col-md-4 mb-4">
+          <div class="card">
+              {% if post.imagen %}
+                  <img src="{{ post.imagen.url }}" class="card-img-top" alt="{{ post.titulo }}">
+              {% else %}
+                  <img src="{% static 'app_instagram/img/default_post.jpg' %}" class="card-img-top" alt="Imagen por defecto">
+              {% endif %}
+              <div class="card-body">
+                  <h5 class="card-title">{{ post.titulo }}</h5>
+                  <p class="card-text">{{ post.contenido|truncatechars:100 }}</p>
+                  <p class="card-text">
+                      <small class="text-muted">Publicado el {{ post.fecha_creacion|date:"d M Y H:i" }}</small>
+                  </p>
+              </div>
+          </div>
+      </div>
+      {% empty %}
+      <p>No hay publicaciones disponibles.</p>
+      {% endfor %}
+  </div>
+</div>
+
+
+
 <!-- Botón de regreso al inicio -->
 <center>
     <a class="navbar-brand" href="{% url 'home' %}">

@@ -1,6 +1,6 @@
 from . import views
 from django.urls import path, include
-from .views import RegisterView,actualizar_perfil,login_user,register_user,HomeView,ConfigView,logout_user,ConfigDatosView,get_user_data, delete_account, perfilView, buscarView
+from .views import RegisterView,actualizar_perfil,login_user,register_user,HomeView,ConfigView,logout_user,ConfigDatosView,get_user_data, delete_account, perfilView, buscarView, eliminar_post
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -13,6 +13,7 @@ urlpatterns = [
     path('buscar_usuario/', views.buscar_usuario, name='buscar_usuario'),
     path('toggle_seguir/', views.toggle_seguir, name='toggle_seguir'),
     path('subir_post/', views.subir_post, name='subir_post'),
+    path('eliminar_post/<str:post_id>/', eliminar_post, name='eliminar_post'),
     #path('search_user/', search_user, name='search_user'),
     #path('buscar/', views.buscar_usuario, name='buscar_usuario'),
     path('login/', login_user, name='login_user'),

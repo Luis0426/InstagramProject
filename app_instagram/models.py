@@ -4,6 +4,7 @@ from django.db import models
 from django.core.validators import FileExtensionValidator
 import os
 import uuid
+from bson import ObjectId
 
 def user_profile_image_path(instance, filename):
     # Se asegura de que el nombre del archivo sea único
@@ -95,12 +96,15 @@ class Comentario(models.Model):
     def __str__(self):
         return f'Comentario de {self.usuario.usuario} en {self.publicacion.id}'
 
+def generate_object_id():
+    return str(ObjectId())
 
 class Post(models.Model):
+    id = models.CharField(max_length=24, primary_key=True, default=generate_object_id)
     titulo = models.CharField(max_length=200)
     contenido = models.TextField()
     imagen = models.ImageField(upload_to='posts/')
-    usuario = models.ForeignKey(UsuarioInsta, on_delete=models.CASCADE)
+    usuario = models.ForeignKey('UsuarioInsta', on_delete=models.CASCADE)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     def str(self):

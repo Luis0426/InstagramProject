@@ -42,7 +42,7 @@
       <div class="col-md-4 mb-4">
           <div class="card">
               {% if post.imagen %}
-                  <img src="{{ post.imagen.url }}" class="card-img-top" alt="{{ post.titulo }}">
+              <img src="{{ post.imagen.url }}" class="card-img-top" alt="{{ post.titulo }}">
               {% else %}
                   <img src="{% static 'app_instagram/img/default_post.jpg' %}" class="card-img-top" alt="Imagen por defecto">
               {% endif %}
@@ -51,6 +51,7 @@
                   <p class="card-text">{{ post.contenido|truncatechars:100 }}</p>
                   <p class="card-text">
                       <small class="text-muted">Publicado el {{ post.fecha_creacion|date:"d M Y H:i" }}</small>
+                      <p class="card-text">Publicado por: {{post.usuario}}</p>
                   </p>
               </div>
           </div>

@@ -58,6 +58,12 @@ class buscarView(View):
         usuario = get_object_or_404(UsuarioInsta, usuario=username)
         return render(request, 'buscar.html', {'nombre_usuario': usuario.usuario, 'correo': usuario.correo})
 
+def eliminar_post(request, post_id):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, id=post_id)
+        post.delete()  # Esto eliminará el post
+        return redirect('perfil')
+
 @login_required
 def buscar_usuario(request):
     username = request.GET.get('username')
@@ -73,13 +79,15 @@ def buscar_usuario(request):
             # Verificar si el usuario actual sigue al usuario buscado
             current_user = request.user
             es_seguido = Relacion.objects.filter(seguidor=current_user, seguido=usuario).exists()
-
+            posts = Post.objects.filter(usuario=usuario).order_by('-fecha_creacion')  
+        
             # Renderizamos la plantilla con el contexto
             return render(request, 'buscar.html', {
                 'usuario': usuario,
                 'seguidores': seguidores_count,
                 'seguidos': seguidos_count,
                 'es_seguido': es_seguido,
+                'posts': posts,
                 'imagen_perfil': usuario.imagen_perfil.url if usuario.imagen_perfil else None  # Pasar la URL de la imagen de perfil
             })
 
@@ -88,7 +96,6 @@ def buscar_usuario(request):
 
     else:
         return render(request, 'buscar.html', {'error_message': 'Nombre de usuario no proporcionado'})
-
 
 @login_required
 def subir_post(request):
@@ -113,6 +120,7 @@ def subir_post(request):
         return redirect('perfil')  # Redirige al perfil después de subir el post
 
     return render(request, 'perfil.html')
+
 @login_required
 def toggle_seguir(request):
     username = request.GET.get('username')

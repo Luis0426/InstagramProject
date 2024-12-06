@@ -86,6 +86,13 @@
                       <small class="text-muted">Publicado el {{ post.fecha_creacion|date:"d M Y H:i" }}</small>
                   </p>
               </div>
+              
+            <div class="px-2">
+                <form method="POST" action="{% url 'eliminar_post' post.id %}" onsubmit="return confirm('¿Estás seguro de que deseas eliminar esta publicación?');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger btn-sm">Eliminar Publicación</button>
+              </form>
+            </div>
           </div>
       </div>
       {% empty %}
