@@ -1,6 +1,16 @@
 from django.core.validators import FileExtensionValidator
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
+from django.core.validators import FileExtensionValidator
+import os
+import uuid
+
+def user_profile_image_path(instance, filename):
+    # Se asegura de que el nombre del archivo sea único
+    extension = filename.split('.')[-1]
+    unique_filename = f"{uuid.uuid4().hex}.{extension}"
+    return os.path.join(f'perfil/{instance.usuario}/', unique_filename)
+
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, correo, password=None, **extra_fields):
@@ -24,9 +34,15 @@ class UsuarioInsta(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-
+    imagen_perfil = models.ImageField(
+        upload_to=user_profile_image_path,
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png'])]
+    )
     objects = UsuarioManager()
-
+    
+    
     USERNAME_FIELD = 'correo'
     REQUIRED_FIELDS = ['usuario', 'nombre']
 
