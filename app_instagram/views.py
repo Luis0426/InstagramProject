@@ -31,7 +31,8 @@ class ConfigDatosView(View):
 
 class HomeView(View):
     def get(self, request):
-        return render(request, 'home.html')
+        posts = Post.objects.all().order_by('-fecha_creacion')  # Ordenar las publicaciones por fecha
+        return render(request, 'home.html', {'posts': posts})
 
 class perfilView(View):
     def get(self, request):
@@ -92,9 +93,14 @@ def buscar_usuario(request):
 @login_required
 def subir_post(request):
     if request.method == 'POST':
-        titulo = request.POST['titulo']
-        contenido = request.POST['contenido']
-        imagen = request.FILES['imagen']
+        titulo = request.POST.get('titulo')
+        contenido = request.POST.get('contenido')
+        imagen = request.FILES.get('imagen')
+
+        # Validar los datos
+        if not titulo or not contenido or not imagen:
+            messages.error(request, 'Por favor, completa todos los campos y sube una imagen.')
+            return render(request, 'perfil.html')
 
         # Crear el post
         nuevo_post = Post.objects.create(
@@ -103,10 +109,10 @@ def subir_post(request):
             imagen=imagen,
             usuario=request.user
         )
+        messages.success(request, '¡Publicación subida con éxito!')
         return redirect('perfil')  # Redirige al perfil después de subir el post
 
-    return render(request, 'perfil.html') 
-
+    return render(request, 'perfil.html')
 @login_required
 def toggle_seguir(request):
     username = request.GET.get('username')
