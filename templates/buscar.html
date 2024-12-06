@@ -14,34 +14,56 @@
       height: 100px;
       object-fit: cover;
     }
+    .container {
+      max-width: 400px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 24px;
+      margin-top: 10px;
+    }
+    p {
+      margin: 5px 0;
+    }
+    .btn-follow {
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
 
-<div class="container p-5 my-5 border">
-    
+<div class="container p-5 my-5 border text-center">
+    <!-- Imagen del perfil -->
     <div>
         <img src="{% static 'app_instagram/img/logousuario.png' %}" alt="Imagen de perfil" class="rounded-circle profile-img">
-        <div class="mb-3">
-            <h1><label for="nombre_usuarioC" class="form-label" id="nombre_usuarioC">{{ nombre_usuario }}</label></h1>
-        </div>
-        <p>seguidores: 11</p>
-        <p>seguidos: 10</p>
-        <center><button class="btn btn-outline-primary">Seguir</button></center>
     </div>
+    
+    <!-- Nombre del usuario -->
+    <div class="mb-3">
+        <h1><span id="nombre_usuarioC">Cargando...</span></h1>
+    </div>
+    
+    <!-- Información de seguidores y seguidos -->
+    <p id="seguidores">Seguidores: Cargando...</p>
+    <p id="seguidos">Seguidos: Cargando...</p>
+    
+    <!-- Botón de seguir -->
+    <button id="seguir-btn" class="btn btn-outline-primary btn-follow">Cargando...</button>
 </div>
 
+<!-- Botón de regreso al inicio -->
 <center>
     <a class="navbar-brand" href="{% url 'home' %}">
-      <img src="{% static 'app_instagram\img\home.jpg' %}" alt="Logo" style="width:40px;" class="rounded-pill"> 
+      <img src="{% static 'app_instagram/img/home.jpg' %}" alt="Logo" style="width:40px;" class="rounded-pill"> 
     </a>
 </center>
+</body>
 </html>
 
 <script>
   document.addEventListener('DOMContentLoaded', async function () {
     const params = new URLSearchParams(window.location.search);
-    const username = params.get('usuario'); // Obtiene el usuario desde la URL
+    const username = params.get('username'); // Obtiene el usuario desde la URL
 
     if (!username) {
         alert('No se proporcionó un usuario.');
@@ -49,18 +71,65 @@
     }
 
     try {
-        const response = await fetch(`/search_user/?username=${encodeURIComponent(username)}`);
-        if (!response.ok) throw new Error('Error en la solicitud: ' + response.statusText);
+        // Verifica si los datos fueron pasados por el contexto (si están disponibles en el HTML)
+        const nombre_usuario = '{{ usuario.usuario }}';
+        const nombre_personal = '{{ usuario.nombre }}';
+        const seguidores = {{ seguidores }};
+        const seguidos = {{ seguidos }};
+        const es_seguido = {{ es_seguido|yesno:"true,false" }}; // Convierte booleano a cadena
 
-        const result = await response.json();
+        if (nombre_usuario && nombre_personal) {
+            // Actualiza la UI con los valores disponibles en el contexto
+            document.getElementById('nombre_usuarioC').textContent = nombre_usuario;
+            document.getElementById('seguidores').textContent = `Seguidores: ${seguidores}`;
+            document.getElementById('seguidos').textContent = `Seguidos: ${seguidos}`;
 
-        if (result.status === 'success') {
-            document.getElementById('nombre_usuarioC').textContent = result.data.nombre_usuario;
+            // Actualizamos el botón según el estado de seguimiento
+            const seguirButton = document.getElementById('seguir-btn');
+            if (es_seguido === 'true') {
+                seguirButton.textContent = 'Dejar de seguir';
+                seguirButton.classList.remove('btn-outline-primary');
+                seguirButton.classList.add('btn-danger');
+            } else {
+                seguirButton.textContent = 'Seguir';
+                seguirButton.classList.remove('btn-danger');
+                seguirButton.classList.add('btn-outline-primary');
+            }
+
+            // Manejar el clic en el botón de seguir
+            seguirButton.addEventListener('click', async function() {
+                try {
+                    // Enviar solicitud AJAX al backend para cambiar el estado de seguimiento
+                    const response = await fetch(`/toggle_seguir/?username=${encodeURIComponent(username)}`);
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        // Actualizar el estado en la UI según la respuesta del servidor
+                        const es_seguido = result.es_seguido;
+                        if (es_seguido) {
+                            seguirButton.textContent = 'Dejar de seguir';
+                            seguirButton.classList.remove('btn-outline-primary');
+                            seguirButton.classList.add('btn-danger');
+                        } else {
+                            seguirButton.textContent = 'Seguir';
+                            seguirButton.classList.remove('btn-danger');
+                            seguirButton.classList.add('btn-outline-primary');
+                        }
+                    } else {
+                        alert('Hubo un problema al intentar cambiar el estado de seguimiento.');
+                    }
+                } catch (error) {
+                    console.error('Error al intentar seguir/dejar de seguir:', error);
+                    alert('Error al intentar seguir/dejar de seguir.');
+                }
+            });
         } else {
             document.getElementById('nombre_usuarioC').textContent = 'Usuario no encontrado';
+            document.getElementById('seguir-btn').style.display = 'none';
         }
     } catch (error) {
         console.error('Error al obtener datos del usuario:', error);
+        alert('Error al cargar los datos del usuario.');
     }
-});
+  });
 </script>

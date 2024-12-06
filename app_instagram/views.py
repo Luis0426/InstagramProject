@@ -42,6 +42,69 @@ class buscarView(View):
         usuario = get_object_or_404(UsuarioInsta, usuario=username)
         return render(request, 'buscar.html', {'nombre_usuario': usuario.usuario, 'correo': usuario.correo})
 
+@login_required
+def buscar_usuario(request):
+    username = request.GET.get('username')
+
+    if username:
+        try:
+            usuario = UsuarioInsta.objects.get(usuario=username)
+
+            # Obtener la cantidad de seguidores y seguidos
+            seguidores_count = Relacion.objects.filter(seguido=usuario).count()
+            seguidos_count = Relacion.objects.filter(seguidor=usuario).count()
+
+            # Verificar si el usuario actual sigue al usuario buscado
+            current_user = request.user
+            es_seguido = Relacion.objects.filter(seguidor=current_user, seguido=usuario).exists()
+
+            # Renderizamos la plantilla con el contexto
+            return render(request, 'buscar.html', {
+                'usuario': usuario,
+                'seguidores': seguidores_count,
+                'seguidos': seguidos_count,
+                'es_seguido': es_seguido
+            })
+
+        except UsuarioInsta.DoesNotExist:
+            return render(request, 'buscar.html', {'error_message': 'Usuario no encontrado'})
+
+    else:
+        return render(request, 'buscar.html', {'error_message': 'Nombre de usuario no proporcionado'})
+    
+
+@login_required
+def toggle_seguir(request):
+    username = request.GET.get('username')
+    current_user = request.user  # Usuario logueado
+    try:
+        usuario = UsuarioInsta.objects.get(usuario=username)
+        
+        # Revisamos si el usuario actual ya sigue al usuario solicitado
+        if current_user in usuario.seguidores.all():
+            # Si ya sigue, se deja de seguir
+            usuario.seguidores.remove(current_user)
+            es_seguido = False
+        else:
+            # Si no sigue, se comienza a seguir
+            usuario.seguidores.add(current_user)
+            es_seguido = True
+
+        # Actualizamos los números de seguidores y seguidos
+        seguidores_count = usuario.seguidores.count()
+        seguidos_count = current_user.seguidos.count()
+
+        return JsonResponse({
+            'status': 'success',
+            'es_seguido': es_seguido,
+            'seguidores': seguidores_count,
+            'seguidos': seguidos_count
+        })
+    except UsuarioInsta.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Usuario no encontrado'})    
+    
+    
+    '''
 @csrf_protect
 def search_user(request):
     if request.method == 'POST':
@@ -64,7 +127,7 @@ def search_user(request):
             return JsonResponse({'status': 'error', 'message': 'Usuario no encontrado'}, status=404)
     else:
         return JsonResponse({'status': 'error', 'message': 'Nombre de usuario no proporcionado'}, status=400)
-    
+'''    
 @csrf_exempt
 def logout_user(request):
     logout(request)
