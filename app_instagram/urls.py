@@ -12,6 +12,7 @@ urlpatterns = [
     #path('buscar/', buscarView.as_view(), name='buscar'),
     path('buscar_usuario/', views.buscar_usuario, name='buscar_usuario'),
     path('toggle_seguir/', views.toggle_seguir, name='toggle_seguir'),
+    path('subir_post/', views.subir_post, name='subir_post'),
     #path('search_user/', search_user, name='search_user'),
     #path('buscar/', views.buscar_usuario, name='buscar_usuario'),
     path('login/', login_user, name='login_user'),

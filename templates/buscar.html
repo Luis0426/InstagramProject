@@ -35,8 +35,9 @@
 <div class="container p-5 my-5 border text-center">
     <!-- Imagen del perfil -->
     <div>
-        <img src="{% static 'app_instagram/img/logousuario.png' %}" alt="Imagen de perfil" class="rounded-circle profile-img">
-    </div>
+      <!-- Aquí agregamos la imagen de perfil del usuario -->
+      <img src="{{ imagen_perfil }}" alt="Imagen de perfil" class="rounded-circle profile-img">
+  </div>
     
     <!-- Nombre del usuario -->
     <div class="mb-3">
@@ -74,8 +75,8 @@
         // Verifica si los datos fueron pasados por el contexto (si están disponibles en el HTML)
         const nombre_usuario = '{{ usuario.usuario }}';
         const nombre_personal = '{{ usuario.nombre }}';
-        const seguidores = {{ seguidores }};
-        const seguidos = {{ seguidos }};
+        let seguidores = {{ seguidores }};
+        let seguidos = {{ seguidos }};
         const es_seguido = {{ es_seguido|yesno:"true,false" }}; // Convierte booleano a cadena
 
         if (nombre_usuario && nombre_personal) {
@@ -115,6 +116,11 @@
                             seguirButton.classList.remove('btn-danger');
                             seguirButton.classList.add('btn-outline-primary');
                         }
+
+                        // Actualizar los contadores de seguidores y seguidos
+                        document.getElementById('seguidores').textContent = `Seguidores: ${result.seguidores}`;
+                        document.getElementById('seguidos').textContent = `Seguidos: ${result.seguidos}`;
+
                     } else {
                         alert('Hubo un problema al intentar cambiar el estado de seguimiento.');
                     }

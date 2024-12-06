@@ -37,22 +37,63 @@
     </form>
     
     <h1 id="nombre_usuarioC">{{ nombre_usuario }}</h1>
-    <p>Seguidores: 11 | Seguidos: 10</p>
-    <button class="btn btn-outline-primary">Seguir</button>
+    <p>Seguidores: {{ seguidores_count }} | Seguidos: {{ seguidos_count }}</p>
+    
 </div>
 
 
 
 <nav class="navbar navbar-expand-sm bg-dark navbar-dark mt-4">
-<ul class="navbar-nav mx-auto">
-<li class="nav-item">
-  <a class="nav-link" href="#">Publicaciones</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="#">Añadir</a>
-</li>
-</ul>
+
 </nav>
+
+<!-- Sección de Subir Publicación -->
+<div class="container">
+ <center> <h3>Subir Publicación</h3></center>
+  <form method="POST" action="{% url 'subir_post' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="mb-3">
+          <label for="titulo" class="form-label">Título</label>
+          <input type="text" class="form-control" id="titulo" name="titulo" required>
+      </div>
+      <div class="mb-3">
+          <label for="contenido" class="form-label">Contenido</label>
+          <textarea class="form-control" id="contenido" name="contenido" rows="3" required></textarea>
+      </div>
+      <div class="mb-3">
+          <label for="imagen" class="form-label">Seleccionar Imagen</label>
+          <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Subir</button>
+  </form>
+</div>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark mt-4">
+
+</nav>
+<!-- Publicaciones del usuario -->
+<div class="container mt-5">
+  <center><h3>Mis Publicaciones</h3></center>
+  <div class="row">
+      {% for post in posts %}
+      <div class="col-md-4 mb-4">
+          <div class="card">
+              <img src="{{ post.imagen.url }}" class="card-img-top" alt="{{ post.titulo }}">
+              <div class="card-body">
+                  <h5 class="card-title">{{ post.titulo }}</h5>
+                  <p class="card-text">{{ post.contenido|truncatechars:100 }}</p>
+                  <p class="card-text">
+                      <small class="text-muted">Publicado el {{ post.fecha_creacion|date:"d M Y H:i" }}</small>
+                  </p>
+              </div>
+          </div>
+      </div>
+      {% empty %}
+      <p>No tienes publicaciones aún.</p>
+      {% endfor %}
+  </div>
+</div>
+
 
 <center>
 <a class="navbar-brand" href="{% url 'home' %}">
@@ -87,6 +128,25 @@
         console.error('Error al obtener datos del usuario:', error);
       }
     });
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      try {
+        // Realiza la solicitud para obtener los datos del usuario
+        const response = await fetch('/get_user_data/');
+        const result = await response.json();
+  
+        if (result.status === 'success') {
+          const data = result.data;
+          // Rellena los campos con los datos obtenidos
+          document.getElementById('nombre_usuarioC').textContent = data.nombre_usuario;
+        } else {
+          alert('Error al cargar los datos del usuario: ' + result.message);
+        }
+      } catch (error) {
+        console.error('Error al obtener datos del usuario:', error);
+      }
+    });
+
 
 </script>
 

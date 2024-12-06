@@ -15,6 +15,7 @@ import json
 from django.contrib import messages
 from .models import UsuarioInsta, Relacion
 from django.views.decorators.csrf import csrf_protect
+from .models import UsuarioInsta, Post
 
 class RegisterView(View):
     def get(self, request):
@@ -34,7 +35,21 @@ class HomeView(View):
 
 class perfilView(View):
     def get(self, request):
-        return render(request, 'perfil.html')
+        posts = Post.objects.filter(usuario=request.user).order_by('-fecha_creacion')
+        # Obtener el usuario logueado
+        usuario = request.user
+        
+        # Contar los seguidores y seguidos usando el modelo Relacion
+        seguidores_count = Relacion.objects.filter(seguido=usuario).count()  # Usuario que es seguido
+        seguidos_count = Relacion.objects.filter(seguidor=usuario).count()  # Usuario que sigue
+        
+        # Pasar los datos a la plantilla
+        return render(request, 'perfil.html', {
+            'nombre_usuario': usuario.usuario,  # Nombre de usuario
+            'seguidores_count': seguidores_count,  # Número de seguidores
+            'seguidos_count': seguidos_count,  # Número de seguidos
+            'posts': posts
+        })
 
 class buscarView(View):
     def get(self, request):
@@ -63,7 +78,8 @@ def buscar_usuario(request):
                 'usuario': usuario,
                 'seguidores': seguidores_count,
                 'seguidos': seguidos_count,
-                'es_seguido': es_seguido
+                'es_seguido': es_seguido,
+                'imagen_perfil': usuario.imagen_perfil.url if usuario.imagen_perfil else None  # Pasar la URL de la imagen de perfil
             })
 
         except UsuarioInsta.DoesNotExist:
@@ -71,38 +87,55 @@ def buscar_usuario(request):
 
     else:
         return render(request, 'buscar.html', {'error_message': 'Nombre de usuario no proporcionado'})
-    
+
+
+@login_required
+def subir_post(request):
+    if request.method == 'POST':
+        titulo = request.POST['titulo']
+        contenido = request.POST['contenido']
+        imagen = request.FILES['imagen']
+
+        # Crear el post
+        nuevo_post = Post.objects.create(
+            titulo=titulo,
+            contenido=contenido,
+            imagen=imagen,
+            usuario=request.user
+        )
+        return redirect('perfil')  # Redirige al perfil después de subir el post
+
+    return render(request, 'perfil.html') 
 
 @login_required
 def toggle_seguir(request):
     username = request.GET.get('username')
-    current_user = request.user  # Usuario logueado
-    try:
-        usuario = UsuarioInsta.objects.get(usuario=username)
-        
-        # Revisamos si el usuario actual ya sigue al usuario solicitado
-        if current_user in usuario.seguidores.all():
-            # Si ya sigue, se deja de seguir
-            usuario.seguidores.remove(current_user)
-            es_seguido = False
-        else:
-            # Si no sigue, se comienza a seguir
-            usuario.seguidores.add(current_user)
-            es_seguido = True
+    usuario = get_object_or_404(UsuarioInsta, usuario=username)  # Obtiene al usuario a seguir
+    current_user = request.user  # Usuario actual (logueado)
 
-        # Actualizamos los números de seguidores y seguidos
-        seguidores_count = usuario.seguidores.count()
-        seguidos_count = current_user.seguidos.count()
+    # Verifica si ya hay una relación de seguimiento
+    ya_seguido = Relacion.objects.filter(seguidor=current_user, seguido=usuario).exists()
 
-        return JsonResponse({
-            'status': 'success',
-            'es_seguido': es_seguido,
-            'seguidores': seguidores_count,
-            'seguidos': seguidos_count
-        })
-    except UsuarioInsta.DoesNotExist:
-        return JsonResponse({'status': 'error', 'message': 'Usuario no encontrado'})    
-    
+    if ya_seguido:
+        # Si ya lo sigue, eliminar la relación (dejar de seguir)
+        Relacion.objects.filter(seguidor=current_user, seguido=usuario).delete()
+        es_seguido = False
+    else:
+        # Si no lo sigue, crear una nueva relación (seguir)
+        Relacion.objects.create(seguidor=current_user, seguido=usuario)
+        es_seguido = True
+
+    # Actualizar los contadores de seguidores y seguidos
+    seguidores_count = Relacion.objects.filter(seguido=usuario).count()
+    seguidos_count = Relacion.objects.filter(seguidor=current_user).count()
+
+    # Retornar la respuesta en formato JSON
+    return JsonResponse({
+        'status': 'success',
+        'es_seguido': es_seguido,
+        'seguidores': seguidores_count,
+        'seguidos': seguidos_count
+    })
     
     '''
 @csrf_protect
